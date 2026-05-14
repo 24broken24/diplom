@@ -4,10 +4,7 @@ using System.Linq;
 
 namespace SymbolicRegression
 {
-    /// <summary>
-    /// План внешнего разбиения (multi-var / 1-var в Program): train/test для сравнения кандидатов.
-    /// Не связан с внутренним 80/20 в <see cref="SymbolicRegressionEngine.Evolve"/>.
-    /// </summary>
+    /// План внешнего разбиения (multi-var / 1-var в Program) train/test для сравнения кандидатов не связан с внутренним 80/20 в <see cref="SymbolicRegressionEngine.Evolve"/>
     internal sealed class ValidationSchedule
     {
         public bool KFoldMode;
