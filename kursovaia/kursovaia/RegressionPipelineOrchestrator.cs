@@ -8,7 +8,7 @@ namespace SymbolicRegression
 {
     internal static class RegressionPipelineOrchestrator
     {
-        /// <summary>Упорядочивает пары (x,y) по x (при равных x — по индексу) для эвристик паттерна и устойчивого hold-out.</summary>
+        /// Упорядочивает пары (x,y) по x при равных x — по индексу для эвристик паттерна и устойчивого hold-out.
         private static void SortOneVarByX(double[] x, double[] y)
         {
             int n = x.Length;
@@ -20,10 +20,6 @@ namespace SymbolicRegression
             Array.Copy(ys, y, n);
         }
 
-        /// <summary>
-        /// Устойчивая сортировка строк матрицы X и вектора y по первому предиктору x₁ (при равных x₁ — по исходному индексу).
-        /// Единый порядок строк для внешнего hold-out и отчёта (этап C плана).
-        /// </summary>
         private static void SortMultivarRowsByFirstColumn(double[][] X, double[] y)
         {
             int n = X.Length;
@@ -44,7 +40,6 @@ namespace SymbolicRegression
             }
         }
 
-        /// <summary>1-var GP: внешний hold-out по той же схеме, что multiVarValidation; иначе — полная выборка (малый n).</summary>
         internal static void ProcessOneVarRegression(
             string excelLabel,
             double[] xRaw,
@@ -353,7 +348,6 @@ namespace SymbolicRegression
                 benchmarkResults[excelLabel] = (medianWinnerTest, yRangeFull);
         }
 
-        /// <summary>Полный ряд без внешнего hold-out (малый n): выбор модели по RMSE на всех точках (как в старой версии).</summary>
         private static void RunOneVarFullSampleNoHoldout(
             string excelLabel,
             double[] xArr,
@@ -430,7 +424,6 @@ namespace SymbolicRegression
 
 
         // Обработка множественной регрессии
-        /// <param name="traceWorkbookLabel">Имя .xlsx для префикса gp_evolution_trace (фаза B); null — взять текущий EvolutionTraceRunLabel или «multi-var».</param>
         internal static (double Rmse, double YRange)? ProcessMultipleRegression(IXLWorksheet worksheet, StreamWriter writer, AppRuntimeConfig runCfg, string? traceWorkbookLabel = null)
         {
             try
@@ -475,7 +468,6 @@ namespace SymbolicRegression
                     return null;
                 }
                 
-                // Для multi-var (2+ предикторов) превью строк — после сортировки по x₁ (см. ниже).
                 if (colCount < 3)
                 {
                     writer.WriteLine("Первые 10 строк данных:");
@@ -489,9 +481,7 @@ namespace SymbolicRegression
                     }
                 }
 
-                // Общий (не подогнанный) случай:
-                // - если 2..N предикторов и Y: символьная регрессия по n переменным (с режимом суперпозиции при наличии base_functions.txt)
-                // - множественная линейная регрессия остается baseline ниже
+
                 if (colCount >= 3)
                 {
                     int n = data.Count;
