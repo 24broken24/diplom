@@ -12,16 +12,14 @@ namespace SymbolicRegression
 {
     public class SymbolicRegressionEngine
     {
-        /// <summary>Параметры журнала эволюции; задаётся из gp_settings.json перед запуском.</summary>
+        /// Параметры журнала эволюции задаётся из gp_settings.json перед запуском
         public static GpEvolutionTraceConfig? GlobalEvolutionTrace { get; set; }
 
-        /// <summary>Метка запуска для строк лога (например, имя файла и режим direct/log-fit/multi-var).</summary>
         public static string EvolutionTraceRunLabel { get; set; } = "";
 
-        /// <summary>Базовый seed рестартов (см. gp_settings.json → gpRandomBaseSeed). Игнорируется при GpRandomizeBaseEachRun.</summary>
         public static int GpRandomBaseSeed { get; set; } = 12345;
 
-        /// <summary>Случайная база перед каждым Evolve() (gp_settings.json → gpRandomizeBaseEachRun).</summary>
+        /// Случайная база перед каждым Evolve() 
         public static bool GpRandomizeBaseEachRun { get; set; }
 
         private static readonly object EvolutionTraceLock = new();
@@ -53,7 +51,7 @@ namespace SymbolicRegression
         private Random random = new Random();
         private double[] xData;
         private double[] yData;
-        private double[][]? XData; // [row][var] for n-variables
+        private double[][]? XData; 
         private int variableCount = 1;
         private int maxDepth = 6;
         private int populationSize = 300;
@@ -84,9 +82,7 @@ namespace SymbolicRegression
             ApplyConfig();
         }
 
-        // Перегрузка для случая, когда внешний код хочет принудительно выбрать
-        // профиль грамматики (например, для log-fit мы знаем, что в log-пространстве
-        // нужны все операции — берём General независимо от паттерна).
+
         public SymbolicRegressionEngine(double[] x, double[] y, GrammarProfile forcedProfile)
         {
             xData = x;
@@ -95,7 +91,6 @@ namespace SymbolicRegression
             variableCount = 1;
             superpositionMode = false;
             config = BuildConfig(forcedProfile);
-            // Помечаем dataPattern из принудительного профиля для информативного вывода
             dataPattern = forcedProfile switch
             {
                 GrammarProfile.Linear => "linear",
@@ -107,14 +102,11 @@ namespace SymbolicRegression
             ApplyConfig();
         }
 
-        /// <summary>
-        /// Multi-var: матрица наблюдений <paramref name="X"/> (строка — объект, столбцы — x₁…xₚ). Единственный путь n переменных в движке.
-        /// </summary>
+
         public SymbolicRegressionEngine(double[][] X, double[] y, List<ExpressionNode>? userBaseFunctions = null, bool superposition = true)
         {
             XData = X;
             yData = y;
-            // Первая колонка X — для одномерных эвристик (если когда-нибудь понадобятся поверх n-var)
             xData = X.Length > 0 ? X.Select(r => r.Length > 0 ? r[0] : 0.0).ToArray() : Array.Empty<double>();
             variableCount = X.Length > 0 ? X[0].Length : 0;
             dataPattern = "multi-var";
@@ -240,7 +232,6 @@ namespace SymbolicRegression
                 if (line.Length == 0) continue;
                 if (line.StartsWith("#")) continue;
 
-                // формат: f1 = <expr> или просто <expr>
                 int eq = line.IndexOf('=');
                 string expr = eq >= 0 ? line[(eq + 1)..].Trim() : line;
                 if (expr.Length == 0) continue;
@@ -284,20 +275,16 @@ namespace SymbolicRegression
         {
             if (xData.Length < 3) return;
 
-            // Безусловно прогоняем синусоидальную подгонку (по x и x²) — даже если в итоге
-            // паттерн классифицируется не как trigonometric, GP сможет использовать
-            // лучший аналитический seed (если RMSE подгонки достаточно мал).
+
             TryFitSinusoid(out _);
 
-            // 1. Линейность — самая простая и однозначная проверка
             if (IsLinear())
             {
                 dataPattern = "linear";
                 return;
             }
 
-            // 2. Тригонометрия раньше полинома: периодичные данные могут случайно
-            //    хорошо ложиться на куб (например sin(x) на [0, 2π] ~ кубический).
+
             int extrema = CountExtrema(yData);
             bool trigLikely = IsTrigonometric();
             if (trigLikely)
@@ -306,29 +293,24 @@ namespace SymbolicRegression
                 return;
             }
 
-            // 3. Полином: при наличии нескольких экстремумов считаем подозрительным,
-            //    но пускаем в полином только если кубический фит близок к идеальному.
             if (IsPolynomial() && extrema < 2)
             {
                 dataPattern = "polynomial";
                 return;
             }
 
-            // 4. Экспонента
             if (IsExponential())
             {
                 dataPattern = "exponential";
                 return;
             }
 
-            // 5. Если экстремумов несколько и trig не подошёл — общий профиль
             if (extrema >= 2)
             {
                 dataPattern = "general";
                 return;
             }
 
-            // 6. Иначе — суперпозиция/общий профиль
             if (IsSuperposition())
             {
                 dataPattern = "superposition";
@@ -402,7 +384,7 @@ namespace SymbolicRegression
                 current = next;
             }
             
-            // Дополнительная проверка - тестируем полиномиальную регрессию
+            // Дополнительная проверка тестируем полиномиальную регрессию
             return TestPolynomialFit();
         }
         
@@ -413,9 +395,6 @@ namespace SymbolicRegression
             double yMax = yData.Max();
             double yRange = Math.Max(yMax - yMin, 1e-9);
 
-            // Чтобы периодические данные не считались "полиномом" из-за случайно
-            // удачной кубической подгонки, требуем, чтобы относительная RMSE
-            // была действительно мизерной (<= 1% от размаха).
             for (int degree = 1; degree <= 3; degree++)
             {
                 var coefficients = Fit.Polynomial(xData, yData, degree);
@@ -450,12 +429,10 @@ namespace SymbolicRegression
         
         private bool IsExponential()
         {
-            // Проверяем, что логарифм Y линейно зависит от X
-            // Избегаем LINQ/ToArray в горячей части анализа
+
             int n = yData.Length;
             if (n < 3) return false;
 
-            // Собираем пары (x, log(y)) только для y>0
             var logY = new List<double>(n);
             var xSubset = new List<double>(n);
             for (int i = 0; i < n; i++)
@@ -527,23 +504,11 @@ namespace SymbolicRegression
             return count;
         }
 
-        // Лучшая аналитическая подгонка y ~ a*sin(w*x) + b*cos(w*x) + c0
-        // (заполняется TryFitSinusoid и используется как seed для GP).
         private double bestSinA, bestSinB, bestSinC0, bestSinW;
         private bool hasBestSinusoid;
-        // bestSinArgKind: какую трансформацию аргумента дала лучшую подгонку
-        //   "x"  → стандартная форма a*sin(w*x) + b*cos(w*x) + c0
-        //   "x2" → форма с x² внутри: a*sin(w*x²) + b*cos(w*x²) + c0
-        // Это нужно, чтобы автоматически распознавать функции вида f(x²)
-        // (например, exp(2.1·sin(1.8 + x²)) после log-преобразования).
         private string bestSinArgKind = "x";
-        // Относительная RMSE лучшей синусоидальной подгонки (RMSE / yRange).
-        // Используется как порог для решения, стоит ли подсевать GP этим seed-ом.
         private double bestSinRelRmse = double.MaxValue;
 
-        // Грубая попытка подогнать y ~ a*sin(w*φ(x)) + b*cos(w*φ(x)) + c
-        // на сетке частот w для разных трансформаций φ ∈ { x, x² };
-        // возвращает минимальный RMSE по объединённой сетке.
         private bool TryFitSinusoid(out double bestRmse)
         {
             bestRmse = double.MaxValue;
@@ -555,8 +520,6 @@ namespace SymbolicRegression
             double xRange = xMax - xMin;
             if (xRange <= 0) return false;
 
-            // Подбираем сетки частот в зависимости от аргумента
-            // Для аргумента φ(x) сетка частот зависит от размаха φ(x).
             (double[] phi, double phiRange, string kind)[] argVariants;
             {
                 double[] phiX = xData;
@@ -637,16 +600,12 @@ namespace SymbolicRegression
                 }
             }
 
-            // Сохраняем относительный RMSE для решения о сидинге GP
             double yRange = yData.Max() - yData.Min();
             bestSinRelRmse = yRange > 0 ? bestRmse / yRange : double.MaxValue;
 
             return bestRmse < double.MaxValue;
         }
 
-        // Возвращает дерево вида (a*sin(w*φ(x1)) + b*cos(w*φ(x1))) + c0,
-        // где φ — либо x, либо x² (выбирается по результатам аналитической подгонки).
-        // Если подгонки нет — null.
         private ExpressionNode? CreateSinusoidSeed()
         {
             if (!hasBestSinusoid) return null;
@@ -721,9 +680,6 @@ namespace SymbolicRegression
             if (depth >= maxDepth)
             {
                 // Листовой узел
-                // Терминалы для n-мерного режима:
-                // - const
-                // - var(xi) или base(fi) в режиме суперпозиции
                 if (random.NextDouble() < config.TerminalConstProbability)
                 {
                     node.Operation = "const";
@@ -807,7 +763,6 @@ namespace SymbolicRegression
         {
             try
             {
-                // legacy 1D wrapper
                 return Evaluate(node, new[] { x });
             }
             catch
@@ -821,7 +776,6 @@ namespace SymbolicRegression
         {
             try
             {
-                // legacy 2D wrapper
                 return Evaluate(node, new[] { x1, x2 });
             }
             catch
@@ -830,7 +784,7 @@ namespace SymbolicRegression
             }
         }
 
-        // Универсальное вычисление дерева для n переменных (vars[0]=x1,...)
+        // Универсальное вычисление дерева для n переменных 
         private double Evaluate(ExpressionNode node, double[] vars)
         {
             switch (node.Operation)
@@ -906,7 +860,7 @@ namespace SymbolicRegression
             }
         }
 
-        // Вычисление приспособленности (fitness)
+        // Вычисление приспособленности 
         private double CalculateFitness(ExpressionNode tree)
         {
             int n = yData.Length;
@@ -939,8 +893,7 @@ namespace SymbolicRegression
             int complexity = CountNodes(tree);
             double invalidRatio = (double)invalidPoints / n;
 
-            // Универсальная устойчивая fitness-функция:
-            // ошибка + сложность + штраф за невалидные предсказания.
+            // Универсальная устойчивая fitness-функция ошибка + сложность + штраф за невалидные предсказания.
             return mse
                    + config.ComplexityPenalty * complexity
                    + config.InvalidPredictionPenalty * invalidRatio;
@@ -957,7 +910,6 @@ namespace SymbolicRegression
             return count;
         }
 
-        /// <summary>Высота дерева (лист = 1). Не опирается на устаревшее поле <see cref="ExpressionNode.Depth"/>.</summary>
         private static int GetMaxDepth(ExpressionNode node)
         {
             if (node.Children.Count == 0) return 1;
@@ -974,7 +926,6 @@ namespace SymbolicRegression
                 SetDepthRecursive(ch, depth + 1);
         }
 
-        /// <summary>Лист для shrink-мутации (этап D).</summary>
         private ExpressionNode CreateRandomTerminal(int depth)
         {
             var node = new ExpressionNode { Depth = depth };
@@ -997,7 +948,6 @@ namespace SymbolicRegression
             return node;
         }
 
-        /// <summary>Если кроссовер/мутация дали превышение <see cref="maxDepth"/> — схлопываем случайные внутренние узлы.</summary>
         private void ClampTreeDepth(ExpressionNode root)
         {
             for (int guard = 0; guard < 100 && GetMaxDepth(root) > maxDepth; guard++)
@@ -1016,7 +966,7 @@ namespace SymbolicRegression
             }
         }
 
-        // Мутация (этап D: hoist / shrink / сильнее константы / subtree)
+        // Мутация 
         private void Mutate(ExpressionNode node)
         {
             MaybeMutateThisNode(node);
@@ -1083,7 +1033,7 @@ namespace SymbolicRegression
             }
         }
 
-        // Скрещивание (этап D: повторные попытки, лимит глубины)
+        // Скрещивание
         private ExpressionNode Crossover(ExpressionNode parent1, ExpressionNode parent2)
         {
             if (random.NextDouble() > crossoverRate)
@@ -1133,15 +1083,7 @@ namespace SymbolicRegression
             }
         }
 
-        /// <summary>
-        /// Главный цикл GP.
-        /// </summary>
-        /// <remarks>
-        /// Внутри одного вызова входные данные (уже те, что переданы в движок) один раз поделены на
-        /// внутренний train и validation (~80/20, см. <see cref="SplitTrainValidation"/>).
-        /// Эволюция идёт на внутреннем train; лучший среди рестартов выбирается по RMSE на этой внутренней validation.
-        /// Это уровень «механики отбора дерева» и не подменяет внешний test в multi-var (там — отдельное разбиение по gp_settings).
-        /// </remarks>
+
         public (ExpressionNode bestTree, double bestFitness) Evolve()
         {
             int sessionBase = GpRandomizeBaseEachRun ? Random.Shared.Next() : GpRandomBaseSeed;
@@ -1152,13 +1094,13 @@ namespace SymbolicRegression
             double bestValRmse = double.MaxValue;
             double bestFitness = double.MaxValue;
 
-            // Мульти-старт: каждый рестарт эволюционирует только на внутреннем train; сравнение рестартов — по RMSE на внутренней validation
+            // Мульти-старт каждый рестарт эволюционирует только на внутреннем train сравнение рестартов — по RMSE на внутренней validation
             for (int restart = 0; restart < config.Restarts; restart++)
             {
                 random = new Random(sessionBase + restart);
                 var (candidate, trainFitness) = RunSingleEvolution(trainX, trainY, restart);
 
-                // Локальная подстройка констант (на внутреннем train); выбор кандидата — по RMSE на внутренней validation
+                // Локальная подстройка констант на внутреннем train выбор кандидата — по RMSE на внутренней validation
                 var optimized = OptimizeConstants(candidate, trainX, trainY);
                 var optimizedTrainFitness = CalculateFitnessOnDataset(optimized, trainX, trainY);
                 var candidateValRmse = CalculateRmse(optimized, valX, valY);
@@ -1174,14 +1116,10 @@ namespace SymbolicRegression
             if (bestTree == null)
                 bestTree = CreateRandomTree();
 
-            // train fitness выбранного по внутренней validation кандидата (см. GpTrainObjectiveReportLabel)
+            // train fitness выбранного по внутренней validation кандидата 
             return (bestTree, bestFitness);
         }
 
-        /// <summary>
-        /// Вложенное разбиение внутри текущей задачи GP: внутренний train / внутренняя validation для эволюции и отбора рестарта.
-        /// Не является «тестом для сравнения моделей» с baseline; для multi-var внешняя оценка задаётся отдельно (multiVarValidation).
-        /// </summary>
         private (double[][] trainX, double[] trainY, double[][] valX, double[] valY) SplitTrainValidation(double validationPart, int seed)
         {
             var X = BuildCurrentDatasetX();
@@ -1231,7 +1169,6 @@ namespace SymbolicRegression
             }
             catch
             {
-                /* игнорируем ошибки логирования */
             }
         }
 
@@ -1239,13 +1176,6 @@ namespace SymbolicRegression
         {
             var population = new List<ExpressionNode>(populationSize);
 
-            // Подсев аналитической подгонкой sin/cos: даём GP сильную стартовую гипотезу
-            // вида (a*sin(w*φ(x)) + b*cos(w*φ(x))) + c, где φ ∈ {x, x²}.
-            // Это резко ускоряет поиск формул вроде sin(x), 2·sin(3x+1), sin(x²+c) и т.п.
-            // Сидим, если относительная RMSE подгонки < 30% — иначе seed бессмысленный.
-            // Универсальное условие (не только trigonometric): помогает и в log-fit,
-            // где паттерн помечен как general, но структура всё равно может быть
-            // тригонометрической (как при exp(sin(x²+c))).
             if (hasBestSinusoid && bestSinRelRmse < 0.3)
             {
                 var seed = CreateSinusoidSeed();
@@ -1326,7 +1256,6 @@ namespace SymbolicRegression
             return (bestTree, bestFitness);
         }
 
-        /// <summary>Текущие входы для Evaluate: либо полная матрица X (multi-var), либо один столбец x (1-var).</summary>
         private double[][] BuildCurrentDatasetX()
         {
             if (XData != null)
@@ -1420,7 +1349,6 @@ namespace SymbolicRegression
             return tree;
         }
 
-        /// <summary>Покоординатный спуск по константам — быстрый baseline и подстраховка после Nelder–Mead.</summary>
         private void CoordinateConstantRefinement(ExpressionNode tree, List<ExpressionNode> constants, double[][] trainX, double[] trainY)
         {
             for (int pass = 0; pass < 3; pass++)
@@ -1461,7 +1389,6 @@ namespace SymbolicRegression
             }
         }
 
-        /// <summary>Целевая функция для Math.NET: MSE+штрафы по узлам <c>const</c> в клоне дерева.</summary>
         private sealed class TreeConstantObjective : IObjectiveFunction
         {
             private readonly SymbolicRegressionEngine _eng;
