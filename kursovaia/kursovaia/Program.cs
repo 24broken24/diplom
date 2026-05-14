@@ -30,8 +30,7 @@ namespace SymbolicRegression
                     Encoding.UTF8);
             }
 
-            // Стабильный вход: автоматически читаем все .xlsx из текущей папки запуска
-            // (кроме временных Excel-файлов вида "~$...")
+            // автоматически читаем все .xlsx из текущей папки запуска
             var excelFiles = Directory.GetFiles(Environment.CurrentDirectory, "*.xlsx")
                 .Where(p => !Path.GetFileName(p).StartsWith("~$"))
                 .OrderBy(p => Path.GetFileName(p), StringComparer.OrdinalIgnoreCase)
@@ -138,7 +137,6 @@ namespace SymbolicRegression
             int n = data.Count;
             int p = data[0].Length - 1; // количество предикторов
 
-            // MathNet: X как jagged [n][p], Y как [n]
             var x = new double[n][];
             var y = new double[n];
             for (int i = 0; i < n; i++)
@@ -152,7 +150,6 @@ namespace SymbolicRegression
                 y[i] = data[i][p];
             }
 
-            // Коэффициенты: [b0, b1..bp]
             return MultipleRegression.QR(x, y, intercept: true);
         }
         
@@ -441,10 +438,7 @@ namespace SymbolicRegression
             }
         }
 
-        // Универсальная оценка дерева для n переменных, поддерживает:
-        // - var (x1..xN)
-        // - base (f1..fk) при наличии baseFunctions
-        // - + - * / sin cos exp log pow neg
+        // Универсальная оценка дерева для n переменных, поддерживает
         internal static ExpressionNode ExpandAndSimplifyBaseFormula(ExpressionNode root, List<ExpressionNode>? baseFunctions)
         {
             var expanded = ExpandBaseReferences(root, baseFunctions, new HashSet<int>());
@@ -452,7 +446,7 @@ namespace SymbolicRegression
             return RewriteSinCosLinearCombination(simplified);
         }
 
-        /// <summary>True, если в дереве есть узлы <c>base</c> (ссылки f1..fk в режиме суперпозиции).</summary>
+        /// true, если в дереве есть узлы base (ссылки f1..fk в режиме суперпозиции)
         internal static bool ExpressionTreeUsesBaseCalls(ExpressionNode? node)
         {
             if (node == null) return false;
@@ -466,9 +460,7 @@ namespace SymbolicRegression
             return false;
         }
 
-        // RMSE одного-переменного дерева (с защитой от NaN/Inf):
-        // невалидные предсказания пропускаются, что позволяет корректно сравнивать
-        // direct vs log-fit на одном и том же датасете.
+        // RMSE одного-переменного дерева (с защитой от NaN/Inf) невалидные предсказания пропускаются, что позволяет корректно сравнивать
         internal static double ComputeRmseSingleVar(ExpressionNode tree, double[] xArr, double[] yArr)
         {
             double sse = 0;
@@ -485,8 +477,7 @@ namespace SymbolicRegression
             return Math.Sqrt(sse / valid);
         }
 
-        // RMSE дерева на (X, y) для произвольного количества переменных,
-        // с поддержкой базовых функций (могут быть null для чистых baseline-деревьев).
+        // RMSE дерева на (X, y) для произвольного количества переменных,с поддержкой базовых функций (могут быть null для чистых baseline-деревьев).
         internal static double ComputeRmseN(ExpressionNode tree, double[][] X, double[] y, List<ExpressionNode>? baseFunctions)
         {
             double sse = 0;
@@ -502,8 +493,6 @@ namespace SymbolicRegression
             return valid > 0 ? Math.Sqrt(sse / valid) : double.MaxValue;
         }
 
-        // Два предиктора почти на одной прямой x2 ≈ a + b·x1 → коэффициенты при x1,x2
-        // в линейной модели определены с точностью до вектора из ядра (неоднозначность).
         internal static bool NearlyCollinearPredictors(double[][] X, int p, out string? note)
         {
             note = null;
@@ -537,11 +526,6 @@ namespace SymbolicRegression
             }
         }
 
-        // Линейный baseline для multi-var: MNLS (псевдообратная) даёт единственное
-        // решение минимальной нормы ||β|| при ранге-дефиците. Если на данных существует
-        // точная целочисленная формула w0+Σwi·xi с малой нормой по (w1..wp) — выбираем её
-        // (критерий: минимум w1²+w2² при p=2 среди точных целых решений, затем минимум |w0|),
-        // без привязки к конкретным числам «как в этом файле».
         internal static ExpressionNode? BuildLinearBaseline(double[][] X, double[] y, int p)
         {
             if (X.Length < p + 2) return null;
@@ -555,7 +539,6 @@ namespace SymbolicRegression
             catch { return null; }
         }
 
-        /// <summary>МНК с матрицей [1 | X] через псевдообратную (аналог pinv в numpy).</summary>
         static double[] LinearRegressionMnls(double[][] X, double[] y, int p)
         {
             int n = X.Length;
@@ -565,10 +548,6 @@ namespace SymbolicRegression
             return pinv.Multiply(yv).ToArray();
         }
 
-        // Ищет целочисленные (w0,w1,...,wp) в ограниченном диапазоне, дающие точное (с tol)
-        // совпадение с y; среди них минимизирует Σ wi² по i≥1, затем |w0|.
-        // На независимых (x1,x2) с иррациональными коэффициентами обычно не находит —
-        // тогда используется вещественный MNLS.
         static bool TryBestIntegerLinearExact(double[][] X, double[] y, int p, out ExpressionNode tree)
         {
             tree = null!;
@@ -629,7 +608,7 @@ namespace SymbolicRegression
             }
             else
             {
-                // p==3: полный перебор был бы слишком большим — пропускаем
+                // p==3 полный перебор был бы слишком большим — пропускаем
                 return false;
             }
 
@@ -645,8 +624,7 @@ namespace SymbolicRegression
             return BuildLinearTree(coef, p);
         }
 
-        // Квадратичный baseline: y = b0 + Σ bi·xi + Σi≤j cij·xi·xj
-        // (включая чистые квадраты xi²). Покрывает поверхности 2-го порядка.
+        // Квадратичный baseline (включая чистые квадраты xi²). Покрывает поверхности 2-го порядка.
         internal static ExpressionNode? BuildQuadraticBaseline(double[][] X, double[] y, int p)
         {
             int n = X.Length;
@@ -672,8 +650,6 @@ namespace SymbolicRegression
             catch { return null; }
         }
 
-        // Log-линейный baseline: log(y) = b0 + Σ bi·xi  →  y = exp(b0 + Σ bi·xi).
-        // Применим только когда y > 0 во всех точках обучающей выборки.
         internal static ExpressionNode? BuildLogLinearBaseline(double[][] X, double[] y, int p)
         {
             int n = X.Length;
@@ -770,10 +746,6 @@ namespace SymbolicRegression
             return result;
         }
 
-        // Косметика для тригонометрии: ищем поддеревья вида (a*sin(arg) + b*cos(arg))
-        // и переписываем в A*sin(arg + φ), где A=√(a²+b²), φ=atan2(b, a).
-        // Аргументы sin и cos считаем "одинаковыми" с малым допуском (≤ 1% по константам),
-        // т.к. GP может слегка разойтись по частоте.
         static ExpressionNode RewriteSinCosLinearCombination(ExpressionNode node)
         {
             for (int i = 0; i < node.Children.Count; i++)
@@ -834,8 +806,7 @@ namespace SymbolicRegression
             public ExpressionNode Arg { get; }
         }
 
-        // Распознаёт узлы (const * sin(arg)), (sin(arg) * const), (const * cos(arg)),
-        // (cos(arg) * const), а также чистые sin(arg)/cos(arg) (амплитуда=1).
+
         static AmpFuncMatch? TryMatchAmplitudeFunc(ExpressionNode node)
         {
             if ((node.Operation == "sin" || node.Operation == "cos") && node.Children.Count == 1)
@@ -885,7 +856,6 @@ namespace SymbolicRegression
                 {
                     if (stack.Contains(idx))
                     {
-                        // Цикл в базовых функциях — оставляем как есть, чтобы не зациклиться
                         return node.Clone();
                     }
 
@@ -912,7 +882,6 @@ namespace SymbolicRegression
                     node.Children[i] = SimplifyExpression(node.Children[i]);
             }
 
-            // Константное свёртывание
             if (node.Operation is "+" or "-" or "*" or "/" or "pow")
             {
                 if (node.Children.Count >= 2 &&
@@ -933,7 +902,6 @@ namespace SymbolicRegression
                 }
             }
 
-            // x + 0, x * 1, x * 0
             if (node.Operation == "+" && node.Children.Count == 2)
             {
                 if (IsConst(node.Children[0], 0)) return node.Children[1];
@@ -956,7 +924,6 @@ namespace SymbolicRegression
                 if (IsConst(node.Children[1], 1)) return node.Children[0];
             }
 
-            // Шаблон: (A - B) + (B + C) -> A + C
             if (node.Operation == "+" && node.Children.Count == 2)
             {
                 var left = node.Children[0];
@@ -1061,7 +1028,6 @@ namespace SymbolicRegression
                     {
                         "sin" => Math.Sin(a),
                         "cos" => Math.Cos(a),
-                        // Math.Exp(709) ~ 8.2e307 — последний шаг перед переполнением double
                         "exp" => a > 709 ? double.PositiveInfinity : Math.Exp(a),
                         "log" => a <= 0 ? double.NaN : Math.Log(a),
                         _ => double.NaN
