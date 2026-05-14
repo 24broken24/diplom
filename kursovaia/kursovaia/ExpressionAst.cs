@@ -78,7 +78,6 @@ namespace SymbolicRegression
             SkipWs();
             if (TryConsume('^'))
             {
-                // right-associative
                 var right = ParsePow();
                 return new ExpressionNode { Operation = "pow", Children = { left, right } };
             }
@@ -115,7 +114,7 @@ namespace SymbolicRegression
                     return new ExpressionNode { Operation = ident, Children = { arg } };
                 }
 
-                // allow numeric identifiers like "pi" later if needed
+                // формат для пи 
                 throw new FormatException($"Unknown identifier '{ident}'");
             }
 
@@ -212,7 +211,7 @@ namespace SymbolicRegression
         public string Operation { get; set; }
         public List<ExpressionNode> Children { get; set; }
         public double? Constant { get; set; }
-        public int? VariableIndex { get; set; } // 0-based: x1 -> 0
+        public int? VariableIndex { get; set; } 
         public int? BaseFunctionIndex { get; set; } // индекс пользовательской базовой функции
         public int Depth { get; set; }
 
