@@ -1,0 +1,52 @@
+<mxfile host="app.diagrams.net" modified="2026-05-07T12:18:00.000Z" agent="Cursor" version="22.0.0" type="device">
+  <diagram id="fig36" name="Multi">
+    <mxGraphModel dx="1200" dy="820" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="cap" value="&lt;b&gt;Рис. 3.6. ProcessMultipleRegression — многомерный режим (≥ 3 столбца)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Hold-out теста отдельно от val внутри Evolve; имя файла base_functions.txt из CurrentDirectory&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="40" y="12" width="820" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="s0" value="Сбор матрицы: строка 1 пропуск (&lt;b&gt;startRow=2&lt;/b&gt;);&lt;br&gt;только полностью числовые строки" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="260" y="64" width="400" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="d0" value="n &amp;lt; 2?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="355" y="128" width="210" height="88" as="geometry" />
+        </mxCell>
+        <mxCell id="sx0" value="Протокол; &lt;b&gt;return null&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="620" y="136" width="200" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="s1" value="Сформировать &lt;b&gt;X&lt;/b&gt;, &lt;b&gt;y&lt;/b&gt; (последний столбец — отклик)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="285" y="232" width="350" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="s2" value="Перемешать индексы (&lt;b&gt;Random(123)&lt;/b&gt;);&lt;br&gt;~20% в &lt;b&gt;XTest, yTest&lt;/b&gt;, остальное train" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="275" y="288" width="370" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="s3" value="&lt;b&gt;LoadBaseFunctions&lt;/b&gt;(base_functions.txt, p)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="310" y="352" width="300" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="s4" value="&lt;b&gt;SymbolicRegressionEngine&lt;/b&gt;(XTrain, yTrain, bases, &lt;br&gt;superposition: true)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="250" y="408" width="420" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="s5" value="&lt;b&gt;Evolve()&lt;/b&gt; → gpTree; собрать кандидатов:&lt;br&gt;GP, linear, quadratic, sin2-x2exp, log-linear" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="240" y="472" width="440" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="s6" value="Сортировка по &lt;b&gt;RMSE_test&lt;/b&gt;; tie-break:&lt;br&gt;linear … GP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="285" y="540" width="350" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="s7" value="Метрики train/test, R², overfit_gap; &lt;b&gt;return&lt;/b&gt; (rmseTest, yRange)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="260" y="600" width="400" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="e01" style="endArrow=classic;html=1;strokeWidth=2" edge="1" parent="1" source="s0" target="d0"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e0y" value="Да" style="endArrow=classic;html=1;strokeWidth=2;fontStyle=1" edge="1" parent="1" source="d0" target="sx0"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e0n" value="Нет" style="endArrow=classic;html=1;strokeWidth=2;fontStyle=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="d0" target="s1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e12" style="endArrow=classic;html=1;strokeWidth=2" edge="1" parent="1" source="s1" target="s2"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e23" style="endArrow=classic;html=1;strokeWidth=2" edge="1" parent="1" source="s2" target="s3"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e34" style="endArrow=classic;html=1;strokeWidth=2" edge="1" parent="1" source="s3" target="s4"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e45" style="endArrow=classic;html=1;strokeWidth=2" edge="1" parent="1" source="s4" target="s5"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e56" style="endArrow=classic;html=1;strokeWidth=2" edge="1" parent="1" source="s5" target="s6"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e67" style="endArrow=classic;html=1;strokeWidth=2" edge="1" parent="1" source="s6" target="s7"><mxGeometry relative="1" as="geometry" /></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,30 @@
+# Base functions for symbolic superposition mode
+# You can keep only the functions relevant to your dataset.
+
+# --- 1-variable primitives ---
+f1 = x1
+f2 = x1^2
+f3 = sin(x1)
+f4 = cos(x1)
+f5 = exp(x1)
+f6 = log(x1^2 + 1)
+
+# --- 2-variable interactions ---
+f7 = x2
+f8 = x1 * x2
+f9 = x1 + x2
+f10 = x1^2 + x2^2
+f11 = sin(x1 + x2)
+f12 = exp(x1) * sin(x2)
+
+
+f19 = exp(x1) * x2
+
+# --- 3-variable interactions ---
+f13 = x3
+f14 = x1 * x2 * x3
+f15 = x1 + x2 + x3
+f16 = (x1 + x2 + x3) / 3
+f17 = sin(x1) + cos(x2) + exp(x3)
+f18 = exp(x1 * x2) + x3^2
+

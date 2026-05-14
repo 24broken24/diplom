@@ -1,0 +1,112 @@
+<mxfile host="app.diagrams.net" modified="2026-05-06T18:05:00.000Z" agent="Cursor" version="22.0.0" type="device">
+  <diagram id="fig-3-2-evolve" name="Evolve">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="cap" value="&lt;b&gt;Рис. 3.2 (схема). Внешний цикл SymbolicRegressionEngine.Evolve()&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Разбиение выборки, мультирестарт, внутри рестарта — RunSingleEvolution + OptimizeConstants;&lt;br&gt;внутренний цикл по поколениям — **рис. 1.2** (**`gp_generation_loop.drawio`**) и §1.2&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="40" y="16" width="800" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="s0" value="&lt;b&gt;Начало&lt;/b&gt; Evolve()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="335" y="86" width="230" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="s1" value="&lt;b&gt;SplitTrainValidation&lt;/b&gt; (доля val ≈ &lt;b&gt;20%&lt;/b&gt;, seed=&lt;b&gt;42&lt;/b&gt;)&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;часть строк — валидация, остальное — обучение train&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="285" y="146" width="330" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="s2" value="&lt;b&gt;bestTree&lt;/b&gt; := null; &lt;b&gt;bestValRmse&lt;/b&gt; := +∞;&lt;br&gt;&lt;b&gt;bestFitness&lt;/b&gt; := +∞" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="295" y="216" width="310" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="s3" value="&lt;b&gt;restart&lt;/b&gt; := 0" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="365" y="282" width="170" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="d1" value="&lt;b&gt;restart &amp;lt; config.Restarts&lt;/b&gt;?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="325" y="336" width="250" height="108" as="geometry" />
+        </mxCell>
+        <mxCell id="sx" value="&lt;b&gt;if&lt;/b&gt; bestTree == null → CreateRandomTree()&lt;br&gt;&lt;b&gt;return&lt;/b&gt; (bestTree, bestFitness)&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;fitness — на train у выбранного дерева&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=0" vertex="1" parent="1">
+          <mxGeometry x="620" y="348" width="260" height="76" as="geometry" />
+        </mxCell>
+        <mxCell id="s4" value="&lt;b&gt;random&lt;/b&gt; := new Random(&lt;b&gt;12345 + restart&lt;/b&gt;)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="305" y="468" width="290" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="s5" value="&lt;b&gt;RunSingleEvolution&lt;/b&gt;(trainX, trainY)&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;поколения: fitness → элита 2 → турнир k=3 → кроссовер → мутация&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="275" y="528" width="350" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="s6" value="&lt;b&gt;OptimizeConstants&lt;/b&gt;(candidate, train)&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;покоординатный дожим листьев const&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="285" y="604" width="330" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="s7" value="&lt;b&gt;candidateValRmse&lt;/b&gt; := RMSE(optimized, &lt;b&gt;val&lt;/b&gt;)&lt;br&gt;trainFitness := fitness на train после дожима" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="275" y="672" width="350" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="d2" value="Кандидат &lt;b&gt;лучше&lt;/b&gt; текущего best?&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;меньше val RMSE или равен и меньше train fitness&lt;/font&gt;" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="305" y="738" width="290" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="s8a" value="&lt;b&gt;Обновить&lt;/b&gt; bestTree, bestValRmse, bestFitness&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;копии optimized&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="40" y="754" width="240" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="s9" value="&lt;b&gt;restart := restart + 1&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="375" y="862" width="170" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="s10" value="&lt;b&gt;Конец&lt;/b&gt; Evolve" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="665" y="450" width="170" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="e01" style="endArrow=classic;html=1;strokeWidth=2" edge="1" parent="1" source="s0" target="s1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" style="endArrow=classic;html=1;strokeWidth=2" edge="1" parent="1" source="s1" target="s2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e23" style="endArrow=classic;html=1;strokeWidth=2" edge="1" parent="1" source="s2" target="s3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e34" style="endArrow=classic;html=1;strokeWidth=2" edge="1" parent="1" source="s3" target="d1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_no" value="Нет" style="endArrow=classic;html=1;strokeWidth=2;fontStyle=1" edge="1" parent="1" source="d1" target="sx">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_yes" value="Да" style="endArrow=classic;html=1;strokeWidth=2;fontStyle=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="d1" target="s4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e45" style="endArrow=classic;html=1;strokeWidth=2" edge="1" parent="1" source="s4" target="s5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e56" style="endArrow=classic;html=1;strokeWidth=2" edge="1" parent="1" source="s5" target="s6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e67" style="endArrow=classic;html=1;strokeWidth=2" edge="1" parent="1" source="s6" target="s7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e78" style="endArrow=classic;html=1;strokeWidth=2" edge="1" parent="1" source="s7" target="d2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2y" value="Да" style="endArrow=classic;html=1;strokeWidth=2;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="d2" target="s8a">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2n" value="Нет" style="endArrow=classic;html=1;strokeWidth=2;fontStyle=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="d2" target="s9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8m" style="endArrow=classic;html=1;strokeWidth=2;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="s8a" target="s9">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="160" y="882" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="loop" style="endArrow=classic;html=1;strokeWidth=2;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="s9" target="d1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="220" y="882" />
+              <mxPoint x="220" y="390" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="esxk" style="endArrow=classic;html=1;strokeWidth=2" edge="1" parent="1" source="sx" target="s10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl" value="след. рестарт" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="128" y="848" width="90" height="24" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

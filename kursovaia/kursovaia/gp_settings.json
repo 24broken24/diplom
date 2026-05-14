@@ -1,0 +1,75 @@
+{
+  "gpProfiles": {
+    "general": {
+      "maxDepth": 6,
+      "populationSize": 340,
+      "generations": 220,
+      "restarts": 18,
+      "mutationRate": 0.15,
+      "crossoverRate": 0.8,
+      "terminalConstProbability": 0.35,
+      "complexityPenalty": 0.01,
+      "invalidPredictionPenalty": 10000.0,
+      "maxExpArg": 20.0,
+      "maxPowAbs": 8.0,
+      "allowedOps": ["+", "-", "*", "/", "sin", "cos", "exp", "log", "pow", "neg"]
+    },
+    "linear": {
+      "maxDepth": 4,
+      "populationSize": 260,
+      "generations": 140,
+      "restarts": 12,
+      "allowedOps": ["+", "-", "*"],
+      "complexityPenalty": 0.02,
+      "maxPowAbs": 2.0
+    },
+    "polynomial": {
+      "maxDepth": 5,
+      "populationSize": 340,
+      "generations": 220,
+      "restarts": 18,
+      "allowedOps": ["+", "*", "pow"],
+      "complexityPenalty": 0.015,
+      "maxPowAbs": 4.0
+    },
+    "trigonometric": {
+      "maxDepth": 5,
+      "populationSize": 320,
+      "generations": 220,
+      "restarts": 18,
+      "allowedOps": ["+", "-", "*", "sin", "cos", "neg"],
+      "complexityPenalty": 0.015
+    },
+    "superposition": {
+      "maxDepth": 6,
+      "populationSize": 430,
+      "generations": 300,
+      "restarts": 24,
+      "allowedOps": ["+", "-", "*", "/", "sin", "cos", "exp", "log", "pow", "neg"],
+      "complexityPenalty": 0.02,
+      "maxPowAbs": 4.0
+    }
+  },
+  "evaluationMaxRelativeRmse": 0.005,
+  "evaluationMaxAbsRmse": 1.0,
+  "gpEvolutionTrace": {
+    "enabled": true,
+    "everyGenerations": 5,
+    "topK": 5,
+    "logFile": "gp_evolution_trace.txt"
+  },
+  "gpRandomBaseSeed": 12345,
+  "gpRandomizeBaseEachRun": false,
+
+  "includeClassicRegressionBaselines": false,
+  "includeOneVarLogFit": false,
+
+
+  "multiVarValidation": {
+    "splitMode": "repeatedHoldout",
+    "repeats": 5,
+    "testFraction": 0.2,
+    "kFolds": 5,
+    "shuffleSeed": 12345
+  }
+}

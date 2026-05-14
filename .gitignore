@@ -1,0 +1,24 @@
+# .NET / Visual Studio
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+.vs/
+*.user
+*.suo
+*.cache
+*.dll
+*.pdb
+*.nupkg
+
+# OS / IDE
+.DS_Store
+.idea/
+
+# Local tooling
+.venv-docx/
+.grok_pdf_render/
+
+# GP runtime outputs (per-run)
+**/gp_evolution_trace.txt
+**/result.txt
