@@ -27,44 +27,31 @@ namespace SymbolicRegression
         [JsonPropertyName("gpProfiles")]
         public Dictionary<string, GpProfileOverride> GpProfiles { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
-        /// <summary>Универсальный порог RMSE / (max Y − min Y): PASS, если выполняется (см. сводку; ИЛИ с evaluationMaxAbsRmse).</summary>
         [JsonPropertyName("evaluationMaxRelativeRmse")]
         public double? EvaluationMaxRelativeRmse { get; set; }
 
-        /// <summary>Универсальный абсолютный порог RMSE для сводки (ИЛИ с относительным порогом).</summary>
         [JsonPropertyName("evaluationMaxAbsRmse")]
         public double? EvaluationMaxAbsRmse { get; set; }
 
-        /// <summary>
-        /// Опционально: журналировать топ деревьев по поколениям в процессе Evolve (см. gp_settings.json).
-        /// </summary>
         [JsonPropertyName("gpEvolutionTrace")]
         public GpEvolutionTraceConfig? GpEvolutionTrace { get; set; }
 
-        /// <summary>База для сидов рестартов GP: random = new Random(gpRandomBaseSeed + restart). По умолчанию 12345.</summary>
         [JsonPropertyName("gpRandomBaseSeed")]
         public int? GpRandomBaseSeed { get; set; }
 
-        /// <summary>Если true, перед каждым Evolve() база выбирается случайно (результаты различаются от запуска к запуску).</summary>
         [JsonPropertyName("gpRandomizeBaseEachRun")]
         public bool GpRandomizeBaseEachRun { get; set; }
 
-        /// <summary>
-        /// 1-var: кандидат log-fit y ≈ exp(g(x)) после обучения на log(y). null/true = включён; false — только прямой GP на (x,y).
-        /// </summary>
         [JsonPropertyName("includeOneVarLogFit")]
         public bool? IncludeOneVarLogFit { get; set; }
 
-        /// <summary>Multi-var: линейная / квадратичная / log-линейная baseline. null = true.</summary>
         [JsonPropertyName("includeClassicRegressionBaselines")]
         public bool? IncludeClassicRegressionBaselines { get; set; }
 
-        /// <summary>Multi-var: repeated hold-out или k-fold, см. gp_settings.json.</summary>
         [JsonPropertyName("multiVarValidation")]
         public MultiVarValidationConfig? MultiVarValidation { get; set; }
     }
 
-    /// <summary>См. gp_settings.json → multiVarValidation.</summary>
     public sealed class MultiVarValidationConfig
     {
         [JsonPropertyName("repeats")]
@@ -83,9 +70,7 @@ namespace SymbolicRegression
         public int? ShuffleSeed { get; set; }
     }
 
-    /// <summary>
-    /// Запись истории популяции GP: какие формулы встречались в ходе поиска (топ-K по fitness за поколение).
-    /// </summary>
+
     public sealed class GpEvolutionTraceConfig
     {
         [JsonPropertyName("enabled")]
