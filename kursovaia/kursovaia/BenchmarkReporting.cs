@@ -7,17 +7,16 @@ namespace SymbolicRegression
 {
     internal static class BenchmarkReporting
     {
-        /// <summary>Подпись в result.txt для числа, возвращаемого Evolve() как «fitness»: это штрафованный MSE на train, не BIC/AIC.</summary>
         internal const string GpTrainObjectiveReportLabel =
             "Значение целевой функции GP на обучении (MSE с штрафами за сложность и долю невалидных предсказаний; не BIC/AIC)";
 
-        /// <summary>Запас, если в gp_settings не задан evaluationMaxRelativeRmse.</summary>
+        /// Запас, если в gp_settings не задан evaluationMaxRelativeRmse
         internal const double DefaultEvaluationMaxRelativeRmse = 0.005;
 
-        /// <summary>Запас, если в gp_settings не задан evaluationMaxAbsRmse.</summary>
+        /// Запас, если в gp_settings не задан evaluationMaxAbsRmse
         internal const double DefaultEvaluationMaxAbsRmse = 1.0;
 
-        /// <summary>Те же правила, что в сводке: PASS, если RMSE ≤ maxAbs или rel ≤ maxRel.</summary>
+        /// Те же правила, что в сводке: PASS, если RMSE ≤ maxAbs или rel ≤ maxRel
         internal static (bool pass, string passReason, double relRmse) EvaluateBenchmarkRow(
             double rmse, double yRange, AppRuntimeConfig cfg)
         {
@@ -67,7 +66,7 @@ namespace SymbolicRegression
                 writer.WriteLine($"Benchmark pass rate (обработанные файлы, N={totalProcessed}): {pass}/{totalProcessed}");
         }
 
-        // Большие RMSE (exp с y~1e43) показываем в экспоненциальном виде.
+        // Большие RMSE показываем в экспоненциальном виде.
         private static string FormatRmse(double v)
         {
             if (double.IsNaN(v) || double.IsInfinity(v)) return v.ToString();
